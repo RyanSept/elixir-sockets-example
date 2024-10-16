@@ -7,6 +7,8 @@ defmodule MyappWeb.Router do
 
   scope "/api", MyappWeb do
     pipe_through :api
+
+    resources "/foobar", FooBarController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

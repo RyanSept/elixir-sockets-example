@@ -9,3 +9,6 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+# execute plain query string with ecto
+Ecto.Adapters.SQL.query!(Myapp.Repo, ~c'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
