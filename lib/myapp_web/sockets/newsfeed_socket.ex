@@ -1,4 +1,4 @@
-defmodule Myapp.EchoSocket do
+defmodule Myapp.NewsfeedSocket do
   @behaviour Phoenix.Socket.Transport
 
   def child_spec(_opts) do
