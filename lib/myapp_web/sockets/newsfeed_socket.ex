@@ -9,7 +9,7 @@ defmodule Myapp.NewsfeedSocket do
   def connect(state) do
     # Callback to retrieve relevant data from the connection.
     # The map contains options, params, transport and endpoint keys.
-    {:ok, state}
+    validate_auth(state)
   end
 
   def init(state) do
@@ -27,5 +27,19 @@ defmodule Myapp.NewsfeedSocket do
 
   def terminate(_reason, _state) do
     :ok
+  end
+
+  defp validate_auth(state) do
+    headers = Enum.into(state[:connect_info][:x_headers] || [], %{})
+    auth_token = headers["x-authorization"]
+
+    case auth_token do
+      "secret" ->
+        {:ok, state}
+
+      _ ->
+        # {:error, %{reason: "unauthorized"}}
+        {:ok, state}
+    end
   end
 end
