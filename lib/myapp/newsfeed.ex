@@ -1,4 +1,5 @@
 defmodule Myapp.Newsfeed do
+  @derive Jason.Encoder
   defstruct author: nil, body: nil, time: nil
 
   def get_feed(),

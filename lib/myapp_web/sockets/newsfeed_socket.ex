@@ -1,5 +1,6 @@
 defmodule Myapp.NewsfeedSocket do
   @behaviour Phoenix.Socket.Transport
+  alias Myapp.Newsfeed
 
   def child_spec(_opts) do
     # We won't spawn any process, so let's ignore the child spec
@@ -12,13 +13,23 @@ defmodule Myapp.NewsfeedSocket do
     validate_auth(state)
   end
 
+  @doc """
+  connect/1 has been ran and we now have a ws connection.
+  We initialize the session here.
+  """
   def init(state) do
-    # Now we are effectively inside the process that maintains the socket.
+    send(self(), :refresh_and_push_feed)
     {:ok, state}
   end
 
   def handle_in({text, _opts}, state) do
     {:reply, :ok, {:text, text}, state}
+  end
+
+  def handle_info(:refresh_and_push_feed, state) do
+    feed = Jason.encode!(Newsfeed.get_feed())
+    schedule_feed_refresh()
+    {:push, {:text, feed}, state}
   end
 
   def handle_info(_, state) do
@@ -27,6 +38,13 @@ defmodule Myapp.NewsfeedSocket do
 
   def terminate(_reason, _state) do
     :ok
+  end
+
+  @doc """
+  Schedule pushing of newsfeed every 10 seconds
+  """
+  def schedule_feed_refresh() do
+    Process.send_after(self(), :refresh_and_push_feed, 10_000)
   end
 
   defp validate_auth(state) do
