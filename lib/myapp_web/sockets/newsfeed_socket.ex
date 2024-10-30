@@ -2,6 +2,8 @@ defmodule Myapp.NewsfeedSocket do
   @behaviour Phoenix.Socket.Transport
   alias Myapp.Newsfeed
 
+  import Plug.Conn
+
   def child_spec(_opts) do
     # We won't spawn any process, so let's ignore the child spec
     :ignore
@@ -47,6 +49,18 @@ defmodule Myapp.NewsfeedSocket do
     Process.send_after(self(), :refresh_and_push_feed, 10_000)
   end
 
+  def handle_error(conn, error) do
+    case error do
+      :unauthorized ->
+        conn
+        |> send_resp(401, "Unauthorized")
+
+      _ ->
+        conn
+        |> send_resp(500, "Internal Server Error")
+    end
+  end
+
   defp validate_auth(state) do
     headers = Enum.into(state[:connect_info][:x_headers] || [], %{})
     auth_token = headers["x-authorization"]
@@ -56,8 +70,7 @@ defmodule Myapp.NewsfeedSocket do
         {:ok, state}
 
       _ ->
-        # {:error, %{reason: "unauthorized"}}
-        {:ok, state}
+        {:error, :unauthorized}
     end
   end
 end

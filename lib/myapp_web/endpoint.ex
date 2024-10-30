@@ -15,7 +15,11 @@ defmodule MyappWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
 
-  socket "/feed", Myapp.NewsfeedSocket, websocket: [connect_info: [:x_headers]]
+  socket "/feed", Myapp.NewsfeedSocket,
+    websocket: [
+      connect_info: [:x_headers],
+      error_handler: {Myapp.NewsfeedSocket, :handle_error, []}
+    ]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
